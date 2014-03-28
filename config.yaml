@@ -1,0 +1,4 @@
+name: 2048judge
+version: 1
+
+worker: tornado
