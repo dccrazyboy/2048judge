@@ -10,4 +10,5 @@ settings = {
 application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/judge/", JudgeHandler),
+    (r"/log/", LogHandler),
 ], **settings)

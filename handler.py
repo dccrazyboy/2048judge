@@ -23,11 +23,20 @@ main_info = '''<html>
     <samp>GET /judge/</samp>
 
 <p>to get table and uid. then use</p>
+
     <samp>GET /judge/?uid=XXXXXXXX&op=left</samp>
+
 <p>to do op in the table, it will return your op, the new table and the status.</p>
 <p>op should in ('up', 'down', 'left', 'right')</p>
 <p>the return status will in ('start', 'running','finish')</p>
 <p>when you receive 'finish', it means you got 2048.</p>
+
+<p>use</p>
+
+    <samp>GET /log/uid=XXXXXXXX</samp>
+
+<p>to get full log</p>
+
 </body>
 
 </html>
@@ -58,12 +67,20 @@ class JudgeHandler(tornado.web.RequestHandler):
             log.append({'table': table, 'op': op, 'status': status})
             kv.set(uid, log)
             self.write(log[-1])
-            pretty_print(table)
         else:
             # first round
             uid = uuid.uuid1().hex
             kv.set(uid, [{'table': gen_table(), 'op': None, 'status': 'start'}])
             self.write({'uid': uid, 'log': kv.get(uid)})
+
+
+class LogHandler(tornado.web.RequestHandler):
+    def get(self):
+        uid = str(self.get_argument('uid', None))
+        if uid:
+            log = kv.get(uid)
+            assert log, 'uid error'
+            self.write({'uid': uid, 'log': log})
 
 
 def gen_table():
