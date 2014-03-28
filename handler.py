@@ -7,7 +7,7 @@ import sae.kvdb
 kv = sae.kvdb.KVClient()
 
 op_set = ('up', 'down', 'left', 'right')
-status_set = ('start', 'running', 'finish')
+status_set = ('start', 'running', 'finish', 'failed')
 
 main_info = '''<html>
 
@@ -33,7 +33,7 @@ main_info = '''<html>
 
 <p>use</p>
 
-    <samp>GET /log/uid=XXXXXXXX</samp>
+    <samp>GET /log/?uid=XXXXXXXX</samp>
 
 <p>to get full log</p>
 
@@ -150,7 +150,20 @@ def check_status(table):
         for j in range(4):
             if table[i][j] == 2048:
                 return 'finish'
-    return 'running'
+    filled = True
+    for i in range(4):
+        for j in range(4):
+            if table[i][j] == 0:
+                filled = False
+    if not filled:
+        return 'running'
+    for i in range(4):
+        for j in range(3):
+            if table[i][j] == table[i][j + 1]:
+                return 'running'
+            if table[j][i] == table[j + 1][i]:
+                return 'running'
+    return 'failed'
 
 
 def add_number(table, num=1):
@@ -161,6 +174,8 @@ def add_number(table, num=1):
             if table[i][j] == 0:
                 select.append([i, j])
         # choice pos
+    if len(select) < num:
+        return
     select = random.sample(select, num)
     # set to 2
     for i, j in select:
